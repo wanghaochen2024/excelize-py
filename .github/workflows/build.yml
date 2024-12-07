@@ -7,12 +7,18 @@ jobs:
     strategy:
       matrix:
         go-version: [1.23.x]
-        os: [macos-latest]
-        python-version: [3.9]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.10]
         targetplatform: [x64]
 
     runs-on: ${{ matrix.os }}
-
+    
+    environment:
+      name: pypi
+      url: https://pypi.org/p/excelize
+    permissions:
+      id-token: write
+      
     steps:
 
     - name: Install Go
@@ -81,3 +87,7 @@ jobs:
       with:
         flags: unittests
         name: codecov-umbrella
+
+    - name: Publish
+      if: github.event_name == "publish" && github.event.prerelease == false
+      uses: pypa/gh-action-pypi-publish@release/v1
