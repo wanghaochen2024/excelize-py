@@ -66,6 +66,7 @@ jobs:
 
   build:
     runs-on: macos-latest
+    needs: [test]
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
