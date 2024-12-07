@@ -64,16 +64,10 @@ jobs:
         flags: unittests
         name: codecov-umbrella
 
-  publish:
+  build:
     runs-on: macos-latest
-    needs: [test]
-    environment:
-      name: pypi
-      url: https://pypi.org/p/excelize
-    permissions:
-      id-token: write
     # if: github.event_name == 'release' && github.event.action == 'published'
-        
+
     steps:
 
       - name: Install Go
@@ -95,11 +89,10 @@ jobs:
           env GO111MODULE=on go vet ./...
           pip install coverage
           
-      - name: Build Python Package
+      - name: Build Shared Library
         env:
           CGO_ENABLED: 1
         run: |
-          pip install build setuptools wheel
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           brew tap messense/macos-cross-toolchains
           brew install FiloSottile/musl-cross/musl-cross i686-unknown-linux-gnu mingw-w64
@@ -115,7 +108,53 @@ jobs:
           CC=gcc GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go
           CC=gcc GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.darwin.dylib main.go
           rm -f libexcelize.*.h
-          python -m build
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libexcelize
+          path: |
+            libexcelize.386.linux.so
+            libexcelize.amd64.linux.so
+            libexcelize.arm64.linux.so
+            libexcelize.amd64.windows.dll
+            libexcelize.386.windows.dll
+            libexcelize.arm64.windows.dll
+            libexcelize.arm64.darwin.dylib
+            libexcelize.amd64.darwin.dylib
+
+
+  publish:
+    runs-on: macos-latest
+    needs: [build]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/excelize
+    permissions:
+      id-token: write
+      
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
+        path: ./
+            
+    - name: Build Python Package
+      run: |
+        ls
+        echo "build"
+        pip install build setuptools wheel
+        python -m build
+        ls
           
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
