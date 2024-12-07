@@ -55,7 +55,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         go build -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go && coverage run -m unittest
-        where go
         pip install build setuptools wheel
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         brew tap messense/macos-cross-toolchains
