@@ -63,15 +63,15 @@ jobs:
         gunzip llvm-mingw-20241203-ucrt-macos-universal.tar.xz
         tar xf llvm-mingw-20241203-ucrt-macos-universal.tar
         export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal"
-      	CC=i686-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
-      	CC=x86_64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.linux.so main.go
-      	CC=aarch64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.linux.so main.go
-      	CC=x86_64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.windows.dll main.go
-      	CC=i686-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.windows.dll main.go
-      	CC=aarch64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.windows.dll main.go
-      	CC=gcc CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go
-      	CC=gcc CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.darwin.dylib main.go
-      	rm -f libexcelize.*.h
+        CC=i686-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
+        CC=x86_64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.linux.so main.go
+        CC=aarch64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.linux.so main.go
+        CC=x86_64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.windows.dll main.go
+        CC=i686-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.windows.dll main.go
+        CC=aarch64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.windows.dll main.go
+        CC=gcc CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go
+        CC=gcc CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.darwin.dylib main.go
+        rm -f libexcelize.*.h
         python -m build
 
     - name: Codecov
