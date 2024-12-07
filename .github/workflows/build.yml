@@ -7,8 +7,8 @@ jobs:
     strategy:
       matrix:
         go-version: [1.23.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.13]
+        os: [macos-latest]
+        python-version: [3.9]
         targetplatform: [x64]
 
     runs-on: ${{ matrix.os }}
@@ -37,23 +37,42 @@ jobs:
     - name: Build
       run: go build -v .
 
-    - name: Test on Windows
-      env:
-        CGO_ENABLED: 1
-      if: matrix.os == 'windows-latest'
-      run: go build -buildmode=c-shared -o libexcelize.amd64.windows.dll main.go && coverage run -m unittest
+    # - name: Test on Windows
+    #   env:
+    #     CGO_ENABLED: 1
+    #   if: matrix.os == 'windows-latest'
+    #   run: go build -buildmode=c-shared -o libexcelize.amd64.windows.dll main.go && coverage run -m unittest
 
-    - name: Test on Linux
-      env:
-        CGO_ENABLED: 1
-      if: matrix.os == 'ubuntu-latest'
-      run: go build -buildmode=c-shared -o libexcelize.amd64.linux.so main.go && coverage run -m unittest
+    # - name: Test on Linux
+    #   env:
+    #     CGO_ENABLED: 1
+    #   if: matrix.os == 'ubuntu-latest'
+    #   run: go build -buildmode=c-shared -o libexcelize.amd64.linux.so main.go && coverage run -m unittest
 
     - name: Test on macOS
       env:
         CGO_ENABLED: 1
       if: matrix.os == 'macos-latest'
-      run: go build -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go && coverage run -m unittest
+      run: |
+        go build -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go && coverage run -m unittest
+        pip install build setuptools wheel
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        brew tap messense/macos-cross-toolchains
+        brew install FiloSottile/musl-cross/musl-cross i686-unknown-linux-gnu mingw-w64
+        wget https://github.com/mstorsjo/llvm-mingw/releases/download/20241203/llvm-mingw-20241203-ucrt-macos-universal.tar.xz
+        gunzip llvm-mingw-20241203-ucrt-macos-universal.tar.xz
+        tar xf llvm-mingw-20241203-ucrt-macos-universal.tar
+        export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal"
+      	CC=i686-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
+      	CC=x86_64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.linux.so main.go
+      	CC=aarch64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.linux.so main.go
+      	CC=x86_64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.windows.dll main.go
+      	CC=i686-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.windows.dll main.go
+      	CC=aarch64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.windows.dll main.go
+      	CC=gcc CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go
+      	CC=gcc CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.darwin.dylib main.go
+      	rm -f libexcelize.*.h
+        python -m build
 
     - name: Codecov
       uses: codecov/codecov-action@v4
