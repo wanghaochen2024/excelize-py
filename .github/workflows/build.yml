@@ -55,6 +55,7 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         go build -buildmode=c-shared -o libexcelize.arm64.darwin.dylib main.go && coverage run -m unittest
+        where go
         pip install build setuptools wheel
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         brew tap messense/macos-cross-toolchains
@@ -64,16 +65,7 @@ jobs:
         tar -xzf llvm-mingw-20241203-ucrt-macos-universal.tar.xz
         echo "unzip finished"
         export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal/bin"
-
-    - name: Build
-      env:
-        CGO_ENABLED: 1
-        CC: i686-linux-gnu-gcc
-        GOOS: linux
-        GOARCH: 386
-      if: matrix.os == 'macos-latest'
-      run: |
-        go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
+        CC=i686-linux-gnu-gcc GOOS=linux GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
         echo "build 2"
         CC=x86_64-linux-musl-gcc GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.linux.so main.go
         CC=aarch64-linux-musl-gcc GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.linux.so main.go
