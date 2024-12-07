@@ -60,9 +60,8 @@ jobs:
         brew tap messense/macos-cross-toolchains
         brew install FiloSottile/musl-cross/musl-cross i686-unknown-linux-gnu mingw-w64
         wget https://github.com/mstorsjo/llvm-mingw/releases/download/20241203/llvm-mingw-20241203-ucrt-macos-universal.tar.xz
-        gunzip llvm-mingw-20241203-ucrt-macos-universal.tar.xz
-        tar xf llvm-mingw-20241203-ucrt-macos-universal.tar
-        export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal"
+        tar -xzf llvm-mingw-20241203-ucrt-macos-universal.tar.xz
+        export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal/bin"
         CC=i686-linux-gnu-gcc GOOS=linux GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
         CC=x86_64-linux-musl-gcc GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.linux.so main.go
         CC=aarch64-linux-musl-gcc GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.linux.so main.go
@@ -84,6 +83,7 @@ jobs:
 
   publish:
     runs-on: macos-latest
+    needs: [test]
     environment:
       name: pypi
       url: https://pypi.org/p/excelize
@@ -103,9 +103,8 @@ jobs:
           # brew tap messense/macos-cross-toolchains
           # brew install FiloSottile/musl-cross/musl-cross i686-unknown-linux-gnu mingw-w64
           # wget https://github.com/mstorsjo/llvm-mingw/releases/download/20241203/llvm-mingw-20241203-ucrt-macos-universal.tar.xz
-          # gunzip llvm-mingw-20241203-ucrt-macos-universal.tar.xz
-          # tar xf llvm-mingw-20241203-ucrt-macos-universal.tar
-          # export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal"
+          # tar -xzf llvm-mingw-20241203-ucrt-macos-universal.tar.xz
+          # export PATH="$(pwd)/llvm-mingw-20241203-ucrt-macos-universal/bin"
           # CC=i686-linux-gnu-gcc GOOS=linux GOARCH=386 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.386.linux.so main.go
           # CC=x86_64-linux-musl-gcc GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.amd64.linux.so main.go
           # CC=aarch64-linux-musl-gcc GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -buildmode=c-shared -o libexcelize.arm64.linux.so main.go
